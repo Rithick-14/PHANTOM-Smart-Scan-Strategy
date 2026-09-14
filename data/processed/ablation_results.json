@@ -1,0 +1,302 @@
+[
+  {
+    "scenario": "static",
+    "variant": "A: Base ML-Greedy",
+    "pd": 1.0,
+    "pfa": 0.0,
+    "avg_intercept_time": 1.0,
+    "spectrum_coverage": 0.875,
+    "total_retuning_cost": 13.0,
+    "total_intercepts": 90
+  },
+  {
+    "scenario": "static",
+    "variant": "B: Base + Uncertainty",
+    "pd": 1.0,
+    "pfa": 0.0,
+    "avg_intercept_time": 5.0,
+    "spectrum_coverage": 1.0,
+    "total_retuning_cost": 39.0,
+    "total_intercepts": 66
+  },
+  {
+    "scenario": "static",
+    "variant": "C: Base + Recency",
+    "pd": 1.0,
+    "pfa": 0.0,
+    "avg_intercept_time": 5.0,
+    "spectrum_coverage": 1.0,
+    "total_retuning_cost": 41.0,
+    "total_intercepts": 65
+  },
+  {
+    "scenario": "static",
+    "variant": "D: Base + LinUCB",
+    "pd": 1.0,
+    "pfa": 0.0,
+    "avg_intercept_time": 5.0,
+    "spectrum_coverage": 1.0,
+    "total_retuning_cost": 39.0,
+    "total_intercepts": 66
+  },
+  {
+    "scenario": "static",
+    "variant": "E: Base + Change Detection",
+    "pd": 1.0,
+    "pfa": 0.0,
+    "avg_intercept_time": 5.0,
+    "spectrum_coverage": 1.0,
+    "total_retuning_cost": 42.0,
+    "total_intercepts": 65
+  },
+  {
+    "scenario": "static",
+    "variant": "F: Full Proposed Framework",
+    "pd": 1.0,
+    "pfa": 0.0,
+    "avg_intercept_time": 5.0,
+    "spectrum_coverage": 1.0,
+    "total_retuning_cost": 42.0,
+    "total_intercepts": 65
+  },
+  {
+    "scenario": "intermittent",
+    "variant": "A: Base ML-Greedy",
+    "pd": 1.0,
+    "pfa": 0.0135,
+    "avg_intercept_time": 0.38,
+    "spectrum_coverage": 1.0,
+    "total_retuning_cost": 36.0,
+    "total_intercepts": 26
+  },
+  {
+    "scenario": "intermittent",
+    "variant": "B: Base + Uncertainty",
+    "pd": 1.0,
+    "pfa": 0.0111,
+    "avg_intercept_time": 8.31,
+    "spectrum_coverage": 1.0,
+    "total_retuning_cost": 58.0,
+    "total_intercepts": 10
+  },
+  {
+    "scenario": "intermittent",
+    "variant": "C: Base + Recency",
+    "pd": 1.0,
+    "pfa": 0.0111,
+    "avg_intercept_time": 9.5,
+    "spectrum_coverage": 1.0,
+    "total_retuning_cost": 58.0,
+    "total_intercepts": 10
+  },
+  {
+    "scenario": "intermittent",
+    "variant": "D: Base + LinUCB",
+    "pd": 1.0,
+    "pfa": 0.0111,
+    "avg_intercept_time": 10.81,
+    "spectrum_coverage": 1.0,
+    "total_retuning_cost": 54.0,
+    "total_intercepts": 10
+  },
+  {
+    "scenario": "intermittent",
+    "variant": "E: Base + Change Detection",
+    "pd": 1.0,
+    "pfa": 0.0111,
+    "avg_intercept_time": 3.86,
+    "spectrum_coverage": 1.0,
+    "total_retuning_cost": 66.0,
+    "total_intercepts": 10
+  },
+  {
+    "scenario": "intermittent",
+    "variant": "F: Full Proposed Framework",
+    "pd": 1.0,
+    "pfa": 0.0111,
+    "avg_intercept_time": 3.86,
+    "spectrum_coverage": 1.0,
+    "total_retuning_cost": 66.0,
+    "total_intercepts": 10
+  },
+  {
+    "scenario": "periodic",
+    "variant": "A: Base ML-Greedy",
+    "pd": 1.0,
+    "pfa": 0.0118,
+    "avg_intercept_time": 3.85,
+    "spectrum_coverage": 1.0,
+    "total_retuning_cost": 48.0,
+    "total_intercepts": 15
+  },
+  {
+    "scenario": "periodic",
+    "variant": "B: Base + Uncertainty",
+    "pd": 1.0,
+    "pfa": 0.0103,
+    "avg_intercept_time": 40.62,
+    "spectrum_coverage": 1.0,
+    "total_retuning_cost": 51.0,
+    "total_intercepts": 3
+  },
+  {
+    "scenario": "periodic",
+    "variant": "C: Base + Recency",
+    "pd": 1.0,
+    "pfa": 0.0101,
+    "avg_intercept_time": 17.0,
+    "spectrum_coverage": 1.0,
+    "total_retuning_cost": 69.0,
+    "total_intercepts": 1
+  },
+  {
+    "scenario": "periodic",
+    "variant": "D: Base + LinUCB",
+    "pd": 1.0,
+    "pfa": 0.0104,
+    "avg_intercept_time": 28.46,
+    "spectrum_coverage": 1.0,
+    "total_retuning_cost": 57.0,
+    "total_intercepts": 4
+  },
+  {
+    "scenario": "periodic",
+    "variant": "E: Base + Change Detection",
+    "pd": 1.0,
+    "pfa": 0.0109,
+    "avg_intercept_time": 8.23,
+    "spectrum_coverage": 1.0,
+    "total_retuning_cost": 62.0,
+    "total_intercepts": 8
+  },
+  {
+    "scenario": "periodic",
+    "variant": "F: Full Proposed Framework",
+    "pd": 1.0,
+    "pfa": 0.0109,
+    "avg_intercept_time": 8.23,
+    "spectrum_coverage": 1.0,
+    "total_retuning_cost": 62.0,
+    "total_intercepts": 8
+  },
+  {
+    "scenario": "agile",
+    "variant": "A: Base ML-Greedy",
+    "pd": 1.0,
+    "pfa": 0.0105,
+    "avg_intercept_time": 31.09,
+    "spectrum_coverage": 1.0,
+    "total_retuning_cost": 69.0,
+    "total_intercepts": 5
+  },
+  {
+    "scenario": "agile",
+    "variant": "B: Base + Uncertainty",
+    "pd": 1.0,
+    "pfa": 0.0118,
+    "avg_intercept_time": 7.7,
+    "spectrum_coverage": 1.0,
+    "total_retuning_cost": 50.0,
+    "total_intercepts": 15
+  },
+  {
+    "scenario": "agile",
+    "variant": "C: Base + Recency",
+    "pd": 1.0,
+    "pfa": 0.0128,
+    "avg_intercept_time": 9.62,
+    "spectrum_coverage": 1.0,
+    "total_retuning_cost": 66.0,
+    "total_intercepts": 22
+  },
+  {
+    "scenario": "agile",
+    "variant": "D: Base + LinUCB",
+    "pd": 1.0,
+    "pfa": 0.0125,
+    "avg_intercept_time": 13.07,
+    "spectrum_coverage": 1.0,
+    "total_retuning_cost": 55.0,
+    "total_intercepts": 20
+  },
+  {
+    "scenario": "agile",
+    "variant": "E: Base + Change Detection",
+    "pd": 1.0,
+    "pfa": 0.0123,
+    "avg_intercept_time": 21.37,
+    "spectrum_coverage": 1.0,
+    "total_retuning_cost": 54.0,
+    "total_intercepts": 19
+  },
+  {
+    "scenario": "agile",
+    "variant": "F: Full Proposed Framework",
+    "pd": 1.0,
+    "pfa": 0.0123,
+    "avg_intercept_time": 21.37,
+    "spectrum_coverage": 1.0,
+    "total_retuning_cost": 54.0,
+    "total_intercepts": 19
+  },
+  {
+    "scenario": "shift",
+    "variant": "A: Base ML-Greedy",
+    "pd": 1.0,
+    "pfa": 0.0,
+    "avg_intercept_time": 13.5,
+    "spectrum_coverage": 1.0,
+    "total_retuning_cost": 37.0,
+    "total_intercepts": 60
+  },
+  {
+    "scenario": "shift",
+    "variant": "B: Base + Uncertainty",
+    "pd": 1.0,
+    "pfa": 0.0,
+    "avg_intercept_time": 5.5,
+    "spectrum_coverage": 1.0,
+    "total_retuning_cost": 38.0,
+    "total_intercepts": 61
+  },
+  {
+    "scenario": "shift",
+    "variant": "C: Base + Recency",
+    "pd": 1.0,
+    "pfa": 0.0,
+    "avg_intercept_time": 3.0,
+    "spectrum_coverage": 1.0,
+    "total_retuning_cost": 45.0,
+    "total_intercepts": 61
+  },
+  {
+    "scenario": "shift",
+    "variant": "D: Base + LinUCB",
+    "pd": 1.0,
+    "pfa": 0.0,
+    "avg_intercept_time": 5.0,
+    "spectrum_coverage": 1.0,
+    "total_retuning_cost": 39.0,
+    "total_intercepts": 61
+  },
+  {
+    "scenario": "shift",
+    "variant": "E: Base + Change Detection",
+    "pd": 1.0,
+    "pfa": 0.0,
+    "avg_intercept_time": 3.5,
+    "spectrum_coverage": 1.0,
+    "total_retuning_cost": 42.0,
+    "total_intercepts": 62
+  },
+  {
+    "scenario": "shift",
+    "variant": "F: Full Proposed Framework",
+    "pd": 1.0,
+    "pfa": 0.0,
+    "avg_intercept_time": 3.5,
+    "spectrum_coverage": 1.0,
+    "total_retuning_cost": 42.0,
+    "total_intercepts": 62
+  }
+]

@@ -1,0 +1,51 @@
+Metadata-Version: 2.4
+Name: smart-ew-scheduler
+Version: 0.1.0
+Summary: Smart Scan Strategy for Electronic Warfare Receiver Scheduler
+Requires-Python: >=3.11
+Description-Content-Type: text/markdown
+Requires-Dist: numpy>=1.24.0
+Requires-Dist: pandas>=2.0.0
+Requires-Dist: scipy>=1.10.0
+Requires-Dist: scikit-learn>=1.2.0
+Requires-Dist: pyyaml>=6.0
+
+# Smart Scan Strategy for Electronic Warfare
+
+A machine-learning-based Electronic Support (ES) receiver scheduler software simulation developed for SIH.
+
+## Overview
+This project simulates an RF environment and demonstrates that an integrated adaptive scheduler (**Contextual Bandits + Dynamic RF Knowledge Map + Uncertainty-Aware Exploration + Environment Change Detection**) can optimize scan decisions over traditional fixed/sequential scan strategies.
+
+## Quick Start
+
+### Installation
+```bash
+pip install -r requirements.txt
+```
+
+### Launch Dashboard
+```bash
+streamlit run app/streamlit_app.py
+```
+
+## Architecture Phases
+- [x] **Phase 0**: Requirements & Architecture Specification
+- [x] **Phase 1**: Minimal RF Environment Simulator (`smart_ew.environment`)
+- [x] **Phase 2**: Receiver Model (`smart_ew.receiver`)
+- [x] **Phase 3**: Sequential Baseline Scheduler (`smart_ew.scheduling.sequential`)
+- [x] **Phase 4**: Evaluation Engine (`smart_ew.evaluation`)
+- [x] **Phase 5**: Feature Engineering (`smart_ew.features`)
+- [x] **Phase 6**: ML Activity Predictor (`smart_ew.models`)
+- [x] **Phase 7**: Dynamic RF Knowledge Map (`smart_ew.knowledge`)
+- [x] **Phase 8**: Contextual Bandit Scheduler (`smart_ew.scheduling.contextual_bandit`)
+- [x] **Phase 9**: Uncertainty-Aware Exploration
+- [x] **Phase 10**: Environment Change Detection
+- [x] **Phase 11**: Periodic Emitter Model
+- [x] **Phase 12**: Frequency-Agile Emitter Model
+- [x] **Phase 13**: Multi-Objective Reward Engine
+- [x] **Phase 14**: Streamlit Dashboard
+- [x] **Phase 15**: Ablation Experiments
+- [x] **Phase 16**: Final Benchmarks
+- [x] **Phase 17**: Documentation & Presentation Materials
+- [x] **Phase 18**: Advanced Extensions (Deep RL Scheduler & FastAPI REST Microservice)
