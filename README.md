@@ -110,9 +110,9 @@ streamlit run app/streamlit_app.py
 
 ### [x] STEP 9 — Interactive Dashboard
 - **Objective:** Build Streamlit web application visualizing real-time spectrum heatmaps, receiver scan trajectories, probability/uncertainty maps, KPI cards, and comparative benchmark metrics for judges.
-- **Files:** [`streamlit_app.py`](file:///c:/Users/TKM00630/OneDrive/Desktop/SIH/app/streamlit_app.py), [`run_step9_demo.py`](file:///c:/Users/TKM00630/OneDrive/Desktop/SIH/experiments/run_step9_demo.py)
+- **Files:** [`streamlit_app.py`](file:///c:/Users/TKM00630/OneDrive/Desktop/SIH/app/streamlit_app.py), [`anomaly_detector.py`](file:///c:/Users/TKM00630/OneDrive/Desktop/SIH/src/smart_ew/knowledge/anomaly_detector.py), [`run_step9_demo.py`](file:///c:/Users/TKM00630/OneDrive/Desktop/SIH/experiments/run_step9_demo.py)
 - **Launch Command:** `streamlit run app/streamlit_app.py`
-- **Output:** Interactive dark-themed web UI with Plotly waterfall heatmaps, debug ground-truth toggle, 5 KPI cards, and real-time comparative line charts.
+- **Output:** Interactive dark-themed web UI featuring Plotly waterfall heatmaps, debug ground-truth toggle, 5 KPI cards (calibrated non-100% $P_d$ & temporal duty-cycle coverage), real-time comparative line charts, and a dedicated **Real-Time RF Anomaly Detection Dashboard Table** flagging environment drift, unexpected bursts, power spikes, and agile pattern shifts.
 
 ---
 

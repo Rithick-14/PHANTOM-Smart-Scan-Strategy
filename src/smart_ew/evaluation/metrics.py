@@ -42,7 +42,9 @@ class EvaluationMetrics:
     cumulative_reward: float = 0.0
     
     # 8. Spectrum Coverage Ratio
-    spectrum_coverage_ratio: float = 1.0  # unique_bands_scanned / num_bands
+    spectrum_coverage_ratio: float = 1.0  # Temporal windowed coverage ratio
+    spatial_coverage_ratio: float = 1.0   # Unique bands discovered ratio
+    temporal_coverage_ratio: float = 1.0  # Sliding window coverage duty cycle ratio
     
     # 9. New Emitter Discovery Time
     new_emitter_discovery_time: float = 0.0

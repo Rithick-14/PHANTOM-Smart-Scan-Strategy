@@ -114,8 +114,18 @@ class SimulationRunner:
             float(np.std(intercept_delays)) if len(intercept_delays) > 0 else 0.0
         )
 
-        # 8. Spectrum Coverage Ratio
-        coverage_ratio = float(len(unique_bands_scanned) / num_bands)
+        # 8. Spectrum Coverage Ratios
+        spatial_coverage = float(len(unique_bands_scanned) / num_bands)
+        
+        # Calculate sliding window temporal monitoring coverage (Window W = num_bands)
+        window_size = min(num_bands, steps)
+        scanned_bands_history = [obs.band_id for obs in observations]
+        window_coverages = []
+        for i in range(len(scanned_bands_history) - window_size + 1):
+            sub_window = set(scanned_bands_history[i : i + window_size])
+            window_coverages.append(len(sub_window) / num_bands)
+            
+        temporal_coverage = float(np.mean(window_coverages)) if window_coverages else spatial_coverage
 
         return EvaluationMetrics(
             scheduler_name=scheduler.name,
@@ -133,7 +143,9 @@ class SimulationRunner:
             average_intercept_time=avg_intercept_time,
             intercept_time_error_std=intercept_time_error_std,
             cumulative_reward=cumulative_reward,
-            spectrum_coverage_ratio=coverage_ratio,
+            spectrum_coverage_ratio=spatial_coverage,
+            spatial_coverage_ratio=spatial_coverage,
+            temporal_coverage_ratio=temporal_coverage,
             total_retuning_cost=total_retuning_cost,
             observations=observations,
         )

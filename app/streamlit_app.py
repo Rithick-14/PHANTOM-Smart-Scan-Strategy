@@ -30,6 +30,7 @@ from smart_ew.scheduling.contextual_bandit import LinUCBScheduler
 from smart_ew.scheduling.uncertainty_aware import UncertaintyAwareScheduler
 from smart_ew.scheduling.change_adaptive import ChangeAdaptiveScheduler
 from smart_ew.evaluation.runner import SimulationRunner
+from smart_ew.knowledge.anomaly_detector import RFAnomalyDetector
 
 
 st.set_page_config(
@@ -63,7 +64,27 @@ st.markdown(
     }
     .metric-value {
         color: #38BDF8;
-        font-size: 26px;
+        font-size: 24px;
+        font-weight: 700;
+        margin-top: 5px;
+    }
+    .anomaly-card {
+        background: linear-gradient(135deg, #3B0764 0%, #1E1B4B 100%);
+        border: 1px solid #7E22CE;
+        border-radius: 10px;
+        padding: 15px;
+        text-align: center;
+        box-shadow: 0 4px 6px -1px rgba(126, 34, 206, 0.3);
+    }
+    .anomaly-title {
+        color: #E9D5FF;
+        font-size: 13px;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+    .anomaly-value {
+        color: #F472B6;
+        font-size: 24px;
         font-weight: 700;
         margin-top: 5px;
     }
@@ -83,6 +104,11 @@ def build_scenario_environment(
     )
     env = RFEnvironment(config)
 
+    # Calibrate realistic signal powers relative to noise floor so SNR is near threshold
+    # SNR = (noise_floor + offset) - noise_floor = offset dB
+    power_high = noise_floor + 12.5  # SNR ~12.5 dB
+    power_med = noise_floor + 10.0   # SNR ~10.0 dB (threshold)
+
     if scenario_name == "Scenario 1: Static Continuous Emitters":
         env.add_emitter(
             ContinuousEmitter(
@@ -90,7 +116,7 @@ def build_scenario_environment(
                     emitter_id="C1",
                     emitter_type="continuous",
                     assigned_bands=[1],
-                    signal_power_dbm=-50.0,
+                    signal_power_dbm=power_high,
                 )
             )
         )
@@ -101,7 +127,7 @@ def build_scenario_environment(
                         emitter_id="C2",
                         emitter_type="continuous",
                         assigned_bands=[num_bands - 2],
-                        signal_power_dbm=-55.0,
+                        signal_power_dbm=power_med,
                     )
                 )
             )
@@ -113,7 +139,7 @@ def build_scenario_environment(
                     emitter_id="I1",
                     emitter_type="intermittent",
                     assigned_bands=[1],
-                    signal_power_dbm=-50.0,
+                    signal_power_dbm=power_high,
                     parameters={"p_on": 0.3, "p_off": 0.4, "initial_active": True},
                 ),
                 seed=42,
@@ -125,7 +151,7 @@ def build_scenario_environment(
                     emitter_id="I2",
                     emitter_type="intermittent",
                     assigned_bands=[max(0, num_bands - 3)],
-                    signal_power_dbm=-55.0,
+                    signal_power_dbm=power_med,
                     parameters={"p_on": 0.2, "p_off": 0.5, "initial_active": False},
                 ),
                 seed=123,
@@ -139,7 +165,7 @@ def build_scenario_environment(
                     emitter_id="RADAR_1",
                     emitter_type="periodic",
                     assigned_bands=[2],
-                    signal_power_dbm=-48.0,
+                    signal_power_dbm=power_high + 2.0,
                     parameters={"period": 10, "duty_duration": 2},
                 )
             )
@@ -152,7 +178,7 @@ def build_scenario_environment(
                     emitter_id="HOPPER_1",
                     emitter_type="agile",
                     assigned_bands=[0, 2, max(0, num_bands - 1)],
-                    signal_power_dbm=-50.0,
+                    signal_power_dbm=power_high,
                     parameters={"dwell_time": 3, "hop_sequence": [0, 2, max(0, num_bands - 1)]},
                 ),
                 seed=42,
@@ -166,7 +192,7 @@ def build_scenario_environment(
                     emitter_id="E1_EARLY",
                     emitter_type="continuous",
                     assigned_bands=[0],
-                    signal_power_dbm=-50.0,
+                    signal_power_dbm=power_high,
                     parameters={"start_time": 0, "end_time": total_steps // 2},
                 )
             )
@@ -177,7 +203,7 @@ def build_scenario_environment(
                     emitter_id="E2_LATE",
                     emitter_type="continuous",
                     assigned_bands=[max(0, num_bands - 1)],
-                    signal_power_dbm=-50.0,
+                    signal_power_dbm=power_high + 3.0,  # Power burst anomaly
                     parameters={"start_time": total_steps // 2, "end_time": total_steps},
                 )
             )
@@ -207,7 +233,7 @@ def get_scheduler(
 
 # Title Header
 st.title("📡 Smart Scan Strategy for Electronic Warfare")
-st.caption("Adaptive ES Receiver Scheduler Simulation & Machine Learning Benchmarking")
+st.caption("Adaptive ES Receiver Scheduler Simulation, Anomaly Detection & Machine Learning Benchmarking")
 
 st.sidebar.header("🕹️ Simulation Settings")
 
@@ -253,6 +279,7 @@ rx = ESReceiver(
         noise_floor_dbm=noise_floor,
         snr_threshold_db=snr_threshold,
         retuning_time_cost=retuning_cost,
+        noise_std_db=2.5,  # Real-world noise variance
     ),
     seed=seed,
 )
@@ -260,6 +287,18 @@ scheduler = get_scheduler(scheduler_choice, num_bands, seed)
 runner = SimulationRunner()
 
 metrics = runner.run(env, rx, scheduler, total_steps=total_steps)
+
+# Run Anomaly Detection Engine
+anomaly_detector = RFAnomalyDetector(num_bands=num_bands)
+for obs in metrics.observations:
+    # Estimate prior probability assumption
+    pred_prob = 0.5
+    if hasattr(scheduler, "knowledge_map"):
+        bk = scheduler.knowledge_map.get_band_knowledge(obs.band_id, obs.timestamp)
+        pred_prob = bk.activity_probability
+    anomaly_detector.evaluate_observation(obs, predicted_prob=pred_prob)
+
+anomaly_summary = anomaly_detector.get_anomaly_summary()
 
 # KPI Cards
 col1, col2, col3, col4, col5 = st.columns(5)
@@ -288,10 +327,11 @@ with col3:
         unsafe_allow_html=True,
     )
 with col4:
+    temp_cov = getattr(metrics, "temporal_coverage_ratio", getattr(metrics, "spectrum_coverage_ratio", 1.0))
     st.markdown(
         f"""<div class="metric-card">
-            <div class="metric-title">Spectrum Coverage</div>
-            <div class="metric-value">{metrics.spectrum_coverage_ratio * 100:.0f}%</div>
+            <div class="metric-title">Temporal Coverage</div>
+            <div class="metric-value">{temp_cov * 100:.0f}%</div>
         </div>""",
         unsafe_allow_html=True,
     )
@@ -346,6 +386,91 @@ if debug_mode:
     )
     fig_gt.update_layout(template="plotly_dark", height=250)
     st.plotly_chart(fig_gt, use_container_width=True)
+
+
+# ANOMALY DETECTION DASHBOARD TABLE & METRICS
+st.markdown("---")
+st.subheader("🚨 Real-Time RF Anomaly & Environment Shift Detection")
+
+anom_col1, anom_col2, anom_col3, anom_col4 = st.columns(4)
+with anom_col1:
+    st.markdown(
+        f"""<div class="anomaly-card">
+            <div class="anomaly-title">Total Anomalies Flagged</div>
+            <div class="anomaly-value">{anomaly_summary['total_anomalies']}</div>
+        </div>""",
+        unsafe_allow_html=True,
+    )
+with anom_col2:
+    st.markdown(
+        f"""<div class="anomaly-card">
+            <div class="anomaly-title">Environment Shift Drift</div>
+            <div class="anomaly-value">{anomaly_summary['category_breakdown'].get('ENVIRONMENT_DRIFT', 0)}</div>
+        </div>""",
+        unsafe_allow_html=True,
+    )
+with anom_col3:
+    st.markdown(
+        f"""<div class="anomaly-card">
+            <div class="anomaly-title">Unexpected Bursts</div>
+            <div class="anomaly-value">{anomaly_summary['category_breakdown'].get('UNEXPECTED_BURST', 0)}</div>
+        </div>""",
+        unsafe_allow_html=True,
+    )
+with anom_col4:
+    st.markdown(
+        f"""<div class="anomaly-card">
+            <div class="anomaly-title">Anomaly Detection Rate</div>
+            <div class="anomaly-value">{anomaly_summary['anomaly_rate'] * 100:.1f}%</div>
+        </div>""",
+        unsafe_allow_html=True,
+    )
+
+st.markdown("<br>", unsafe_allow_html=True)
+
+# Build Anomaly Dataframe for Dashboard Table
+table_data = []
+for record in anomaly_detector.anomaly_records:
+    status_str = "🔴 ANOMALY" if record.is_anomaly else "🟢 NORMAL"
+    table_data.append(
+        {
+            "Step": record.timestamp,
+            "Band": f"Band {record.band_id}",
+            "Status": status_str,
+            "Category": record.anomaly_category,
+            "Surprise Score": round(record.surprise_score, 3),
+            "Measured Power (dBm)": round(record.measured_power_dbm, 1),
+            "Action Taken": record.action_triggered,
+            "Description Rationale": record.description,
+        }
+    )
+
+df_anomaly = pd.DataFrame(table_data)
+
+# Filter Controls
+filter_option = st.radio(
+    "Filter Anomaly Log Table:",
+    ["Show Flagged Anomalies Only", "Show Full Observation Log"],
+    horizontal=True,
+)
+
+if filter_option == "Show Flagged Anomalies Only":
+    df_display = df_anomaly[df_anomaly["Status"] == "🔴 ANOMALY"]
+else:
+    df_display = df_anomaly
+
+st.dataframe(
+    df_display,
+    use_container_width=True,
+    hide_index=True,
+    column_config={
+        "Step": st.column_config.NumberColumn("Time Step", format="%d"),
+        "Surprise Score": st.column_config.ProgressColumn(
+            "Surprise Score", min_value=0.0, max_value=1.0, format="%.2f"
+        ),
+    },
+)
+
 
 # Performance Breakdown
 st.markdown("---")
