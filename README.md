@@ -17,6 +17,9 @@ pip install -r requirements.txt
 streamlit run app/streamlit_app.py
 ```
 
+### Live band-time chart
+
+In **Live scan + runtime injection** mode, the band-time chart uses the same receiver-observation rows shown in the live event log. The x-axis is the simulation step and the y-axis is the frequency band. Teal markers mean detection, amber markers mean false alarm, and gray markers mean the receiver scanned the band but reported quiet. A blank band/step cell means it was not scanned. The chart refreshes with the one-second live fragment and on manual steps; Reset clears its history.
 ## Architecture Phases
 - [x] **Phase 0**: Requirements & Architecture Specification
 - [x] **Phase 1**: Minimal RF Environment Simulator (`smart_ew.environment`)

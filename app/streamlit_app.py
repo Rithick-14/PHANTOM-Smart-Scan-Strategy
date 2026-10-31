@@ -1,5 +1,6 @@
 import os
 import sys
+from pathlib import Path
 
 # Ensure src directory is on sys.path regardless of launch CWD
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
@@ -45,8 +46,10 @@ st.markdown(
     """
     <style>
     .main {
-        background-color: #0E1117;
+        background-color: transparent;
         color: #FFFFFF;
+        position: relative;
+        z-index: 1;
     }
     .metric-card {
         background: linear-gradient(135deg, #1E2640 0%, #0F172A 100%);
@@ -93,6 +96,7 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
+st.html(Path(__file__).parent / "assets" / "logicor_background.html", unsafe_allow_javascript=True)
 
 def build_scenario_environment(
     scenario_name: str, num_bands: int, total_steps: int, noise_floor: float
@@ -237,6 +241,12 @@ st.caption("Adaptive ES Receiver Scheduler Simulation, Anomaly Detection & Machi
 
 st.sidebar.header("🕹️ Simulation Settings")
 
+execution_mode = st.sidebar.radio(
+    "Execution Mode",
+    ["Live scan + runtime injection", "Batch evaluation"],
+    help="Live mode keeps one simulation run in session state and accepts simulated emitters while scans advance.",
+)
+
 scenario = st.sidebar.selectbox(
     "RF Environment Scenario",
     [
@@ -273,6 +283,23 @@ debug_mode = st.sidebar.checkbox("🔍 Debug Mode (Show Ground Truth Spectrum)",
 
 
 # Run Simulation
+if execution_mode == "Live scan + runtime injection":
+    from live_simulation import render_live
+
+    render_live(
+        scenario,
+        scheduler_choice,
+        num_bands,
+        total_steps,
+        noise_floor,
+        snr_threshold,
+        retuning_cost,
+        seed,
+        build_scenario_environment,
+        get_scheduler,
+    )
+    st.stop()
+
 env = build_scenario_environment(scenario, num_bands, total_steps, noise_floor)
 rx = ESReceiver(
     ReceiverConfig(

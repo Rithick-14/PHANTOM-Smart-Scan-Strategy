@@ -1,0 +1,168 @@
+<style>
+#logicor-background { position: fixed; inset: 0; width: 100vw; height: 100vh; display: block; touch-action: none; pointer-events: none; z-index: 0; background: #010103; }
+.stApp { background: #010103 !important; }
+div[data-testid="stAppViewContainer"], div[data-testid="stMain"] { background: transparent !important; }
+div[data-testid="stMain"] { position: relative; z-index: 1; }
+div[data-testid="stSidebar"] { position: relative; z-index: 2; background: rgba(8, 13, 24, .94) !important; }
+div[data-testid="stHeader"] { background: rgba(1, 1, 3, .65) !important; }
+</style>
+<canvas id="logicor-background" role="img" aria-label="Blue particles drifting across a dark background"></canvas>
+<script>
+
+(() => {
+  const requestedCanvas = document.getElementById('logicor-background');
+  const activeBackground = window.__logicorBackground;
+  if (activeBackground) { activeBackground.attach(requestedCanvas); return; }
+  let canvas = requestedCanvas;
+  let ctx = canvas.getContext('2d');
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  const CORE = 82;       // soft keep-out radius (px)
+  const REACH = 150;     // smaller zero-gravity influence radius (px)
+  const BUCKETS = 8;
+
+  let W = 0, H = 0, dpr = 1, parts = [], raf = 0, last = 0, time = 0;
+  const ptr = { x: -9999, y: -9999, px: -9999, py: -9999, active: false, glow: 0 };
+  const rand = (a, b) => a + Math.random() * (b - a);
+
+  function build() {
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    W = window.innerWidth; H = window.innerHeight;
+    canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const small = W < 700;
+    const per = small ? 55 : 26;                          // px² per grain — packed dense
+    const count = Math.min(Math.round((W * H) / per), small ? 2800 : 9000);
+    parts = new Array(count);
+    for (let i = 0; i < count; i++) {
+      parts[i] = { x: Math.random() * W, y: Math.random() * H, vx: 0, vy: 0,
+        z: Math.random(),                                  // depth: size, speed and brightness
+        ph: Math.random() * 6.283, e: 0, base: rand(.1, .24) };
+    }
+    if (reduce.matches) render();
+  }
+
+  function step(dt) {
+    const k = Math.min(dt / 16.67, 2.5);
+    const damp = Math.pow(.985, k);                        // low friction: grains keep floating
+    const on = ptr.active;
+    const pvx = on ? ptr.x - ptr.px : 0, pvy = on ? ptr.y - ptr.py : 0;
+    time += dt * .0004;
+    for (let i = 0; i < parts.length; i++) {
+      const p = parts[i];
+      // ambient weightless drift (slow curl) — no home position to return to
+      const a = Math.sin(p.x * .004 + time * 2 + p.ph) + Math.cos(p.y * .005 - time * 1.6);
+      let ax = Math.cos(a * 1.7) * .0035 * (.4 + p.z), ay = Math.sin(a * 1.7) * .0035 * (.4 + p.z) - .0012 * (.3 + p.z);
+      if (on) {
+        const dx = p.x - ptr.x, dy = p.y - ptr.y, d2 = dx * dx + dy * dy;
+        if (d2 < REACH * REACH) {
+          const d = Math.sqrt(d2) || .001, nx = dx / d, ny = dy / d, fall = 1 - d / REACH;
+          // anti-gravity: grains are lifted up and pushed outward, then keep drifting
+          const push = (fall * fall * .8 + (d < CORE + 40 ? (1 - d / (CORE + 40)) * 3.4 : 0)) * k;
+          ax += nx * push; ay += ny * push - fall * .09 * k;
+          ax += pvx * fall * .02 * k; ay += pvy * fall * .02 * k;
+          if (fall * .9 > p.e) p.e = Math.min(fall * 1.1, 1);
+          if (d < CORE) { const m = CORE - d; p.x += nx * m * .14; p.y += ny * m * .14; }
+        }
+      }
+      p.vx = (p.vx + ax * k) * damp; p.vy = (p.vy + ay * k) * damp;
+      const sp = Math.hypot(p.vx, p.vy);
+      if (sp > 6) { p.vx *= 6 / sp; p.vy *= 6 / sp; }
+      p.x += p.vx * k; p.y += p.vy * k;
+      // wrap so the cloud never empties
+      if (p.x < -2) p.x += W + 4; else if (p.x > W + 2) p.x -= W + 4;
+      if (p.y < -2) p.y += H + 4; else if (p.y > H + 2) p.y -= H + 4;
+      p.e *= Math.pow(.972, k);
+    }
+    ptr.px = ptr.x; ptr.py = ptr.y;
+  }
+
+  function render() {
+    ctx.fillStyle = '#010103';
+    ctx.fillRect(0, 0, W, H);
+
+    if (ptr.active || ptr.glow > .01) {
+      const g = ctx.createRadialGradient(ptr.x, ptr.y, CORE * .5, ptr.x, ptr.y, 150);
+      const a = .15 * ptr.glow;
+      g.addColorStop(0, `rgba(47,107,255,${a})`);
+      g.addColorStop(.45, `rgba(30,70,200,${a * .38})`);
+      g.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = g;
+      ctx.fillRect(ptr.x - 150, ptr.y - 150, 300, 300);
+    }
+
+    const bins = Array.from({ length: BUCKETS }, () => []);
+    const on = ptr.active;
+    for (let i = 0; i < parts.length; i++) {
+      const p = parts[i];
+      let prox = 0;
+      if (on) {
+        const d = Math.hypot(p.x - ptr.x, p.y - ptr.y);
+        if (d < CORE * .8) continue;                       // never beneath the cursor
+        prox = Math.max(0, 1 - d / REACH);
+      }
+      const v = Math.min((p.base * (.6 + p.z * .8)) * (1 + prox * 2.2) + p.e * .85 + prox * prox * .2, 1);
+      bins[Math.min(BUCKETS - 1, (v * BUCKETS) | 0)].push(p);
+    }
+    for (let b = 0; b < BUCKETS; b++) {
+      const arr = bins[b]; if (!arr.length) continue;
+      const v = (b + .5) / BUCKETS;
+      const r = Math.round(36 + v * v * 90), gC = Math.round(70 + v * 120), bC = Math.round(190 + v * 65);
+      ctx.fillStyle = `rgba(${r},${gC},${bC},${.2 + v * .8})`;
+      for (let i = 0; i < arr.length; i++) {
+        const p = arr[i], s = p.z > .8 ? 1.7 : p.z > .4 ? 1.3 : 1;
+        ctx.fillRect(p.x, p.y, s, s);
+      }
+    }
+  }
+
+  function loop(t) {
+    const dt = Math.min(t - last || 16.7, 50); last = t;
+    ptr.glow += ((ptr.active ? 1 : 0) - ptr.glow) * Math.min(dt / 140, 1);
+    step(dt); render();
+    raf = requestAnimationFrame(loop);
+  }
+
+  function setPtr(e) {
+    const r = canvas.getBoundingClientRect();
+    ptr.x = e.clientX - r.left; ptr.y = e.clientY - r.top;
+    if (!ptr.active) { ptr.px = ptr.x; ptr.py = ptr.y; }
+    ptr.active = true;
+    if (reduce.matches) { ptr.glow = 1; render(); }
+  }
+  function clearPtr() {
+    ptr.active = false;
+    if (reduce.matches) { ptr.glow = 0; render(); }
+  }
+  window.addEventListener('pointermove', setPtr, { passive: true });
+  window.addEventListener('pointerdown', setPtr, { passive: true });
+  window.addEventListener('pointerup', e => { if (e.pointerType === 'touch') clearPtr(); });
+  window.addEventListener('pointercancel', clearPtr);
+  document.documentElement.addEventListener('pointerleave', clearPtr);
+  window.addEventListener('blur', clearPtr);
+
+  let rt;
+  window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(build, 120); });
+
+  function start() {
+    cancelAnimationFrame(raf);
+    build();
+    if (reduce.matches) render(); else raf = requestAnimationFrame(loop);
+  }
+  reduce.addEventListener ? reduce.addEventListener('change', start) : reduce.addListener(start);
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) cancelAnimationFrame(raf);
+    else if (!reduce.matches) { last = 0; raf = requestAnimationFrame(loop); }
+  });
+  window.__logicorBackground = {
+    attach(nextCanvas) {
+      if (!nextCanvas) return;
+      canvas = nextCanvas;
+      ctx = canvas.getContext('2d');
+      start();
+    },
+  };
+  start();
+})();
+
+</script>
